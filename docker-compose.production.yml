@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  xhs-api-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.api.production
+    image: nicolezhou0309/xhs-downloader:latest
+    container_name: xhs-downloader-api-prod
+    restart: unless-stopped
+    ports:
+      - "8000:8000"    # API服务器端口
+    volumes:
+      # 挂载下载目录到宿主机，持久化数据
+      - ./downloads:/app/downloads
+      - ./logs:/app/logs
+      - ./temp:/app/temp
+      - ./Volume:/app/Volume
+    environment:
+      # 基础配置
+      - ENVIRONMENT=production
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEBUG=false
+      
+      # API认证配置
+      - API_ENABLED=true
+      - API_KEY=${XHS_API_KEY:-K8mN2pQ9vR5xY7zA}
+      - API_KEY_HEADER=accesstoken
+      
+      # API路径配置
+      - API_ROOT_PATH=/xhsdownload
+      - BASE_URL=/xhsdownload
+      
+      # 安全配置
+      - RATE_LIMIT_ENABLED=true
+      - RATE_LIMIT_REQUESTS=100
+      - RATE_LIMIT_WINDOW=3600
+      
+      # 下载配置（默认不下载图片，节省资源）
+      - DOWNLOAD_PATH=/app/downloads
+      - MAX_CONCURRENT_DOWNLOADS=5
+      - REQUEST_TIMEOUT=30
+      - IMAGE_DOWNLOAD=false
+      - VIDEO_DOWNLOAD=true
+      - LIVE_DOWNLOAD=false
+      
+      # 日志配置
+      - LOG_LEVEL=INFO
+      - LOG_FILE=/app/logs/xhs_api.log
+    networks:
+      - xhs-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+networks:
+  xhs-network:
+    driver: bridge
+    
+volumes:
+  xhs-downloads:
+    driver: local
+  xhs-logs:
+    driver: local
+  xhs-temp:
+    driver: local
+  xhs-volume:
+    driver: local

@@ -37,12 +37,12 @@ services:
       - RATE_LIMIT_REQUESTS=100
       - RATE_LIMIT_WINDOW=3600
       
-      # 下载配置（默认不下载图片，节省资源）
+      # 下载配置（默认不下载图片和视频，节省资源）
       - DOWNLOAD_PATH=/app/downloads
       - MAX_CONCURRENT_DOWNLOADS=5
       - REQUEST_TIMEOUT=30
       - IMAGE_DOWNLOAD=false
-      - VIDEO_DOWNLOAD=true
+      - VIDEO_DOWNLOAD=false
       - LIVE_DOWNLOAD=false
       
       # 日志配置
